@@ -169,14 +169,9 @@ async def daily_data(hass: HomeAssistant, resource) -> float:
             _LOGGER.exception("Unexpected exception: %s. Please open an issue", ex)
 
     try:
+        t_from = await hass.async_add_executor_job(resource.round, as_utc(now()), "P1D")
         # Round to the minute in local time zone
-        t_to = await hass.async_add_executor_job(resource.round, now(), "PT1M")
-
-        # Convert Local time to UTC for API call
-        t_to_as_utc = as_utc(t_to)
-
-        # Create UTC Start dateTime use current utc time as reference.
-        t_from_as_utc = datetime(t_to_as_utc.year , t_to_as_utc.month, t_to_as_utc.day , hour=0 , tzinfo=timezone.utc)
+        t_to = await hass.async_add_executor_job(resource.round, as_utc(now()), "PT1M")
 
         _LOGGER.debug(
             "Get readings from %s to %s for %s", t_from_as_utc, t_to_as_utc, resource.classifier
